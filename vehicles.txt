@@ -1,0 +1,1 @@
+CAR;1;Awaryjny;Test;2020;100.0;false
