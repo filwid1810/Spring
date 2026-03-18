@@ -2,17 +2,18 @@ package org.example;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserRepository implements IUserRepository {
-    List<User> users;
+    List<User> users = new ArrayList<>();
     String filePath;
 
     @Override
     public User getUser(String login) {
         for (User user : users) {
             if (user.getLogin().equals(login)) {
-                return user;
+                return user.copy();
             }else{
                 System.out.println(user.getLogin()
                 + " not found");
@@ -23,7 +24,11 @@ public class UserRepository implements IUserRepository {
 
     @Override
     public List<User> getUsers() {
-        return users;
+        List<User> copyUsers = new ArrayList<>();
+        for (User user : users) {
+            copyUsers.add(user.copy());
+        }
+        return copyUsers;
     }
 
     @Override
@@ -33,7 +38,6 @@ public class UserRepository implements IUserRepository {
 
     @Override
     public void save() {
-
             try(PrintWriter writer = new PrintWriter(filePath)) {
                 for(User v:users){
                     writer.println(v.getLogin());
