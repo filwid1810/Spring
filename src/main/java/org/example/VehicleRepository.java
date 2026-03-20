@@ -10,11 +10,10 @@ import java.util.Scanner;
 
 public class VehicleRepository implements IVehicleRepository {
     List<Vehicle> vehicles = new ArrayList<>();
-    private String filePath;
+    private String filePath = "vehicles.csv";
 
     public VehicleRepository() {
-        this.filePath = "vehicles.txt";
-        load(filePath);
+        load();
 
         if(vehicles.isEmpty()) {
             vehicles.add(new Car("1", "Awaryjny", "Test", 2020, 100.0, false));
@@ -27,7 +26,7 @@ public class VehicleRepository implements IVehicleRepository {
         for(Vehicle v:vehicles){
             if(v.getId().equals(id)&&!v.isRented()){
                 v.setRented(true);
-                save(filePath);
+                save();
                 return true;
             }
         }
@@ -39,7 +38,7 @@ public class VehicleRepository implements IVehicleRepository {
         for(Vehicle v:vehicles){
             if(v.getId().equals(id)&&v.isRented()){
                 v.setRented(false);
-                save(filePath);
+                save();
                 return true;
             }
         }
@@ -55,18 +54,10 @@ public class VehicleRepository implements IVehicleRepository {
         return result;
     }
 
-    @Override
-    public Vehicle getVehicle(String id) {
-        return null;
-    }
+
 
     @Override
-    public boolean add(Vehicle vehicle) {
-        return false;
-    }
-
-    @Override
-    public void save(String filePath) {
+    public void save() {
         try(PrintWriter writer = new PrintWriter(filePath)) {
             for(Vehicle v:vehicles){
                 writer.println(v.toCSV(v.getId(),v.getBrand(),v.getModel(),v.getYear(),v.getPrice(),v.isRented()));
@@ -78,7 +69,7 @@ public class VehicleRepository implements IVehicleRepository {
     }
 
     @Override
-    public void load(String filePath) {
+    public void load() {
         try{
             File file = new File(filePath);
             Scanner scannerf = new Scanner(file);
@@ -94,7 +85,7 @@ public class VehicleRepository implements IVehicleRepository {
                 Vehicle cur;
 
                 if (type.equals("MOTORCYCLE")) {
-                    cur = new Motorcycle(split[1], split[2], split[3], Integer.parseInt(split[4]), Double.parseDouble(split[5]), Boolean.parseBoolean(split[6]), split[7]);
+                    cur = new Motorcycle(split[1], split[2], split[3], Integer.parseInt(split[4]), Double.parseDouble(split[5]), Boolean.parseBoolean(split[6]), MotorcycleCategory.valueOf(split[7]));
                     vehicles.add(cur);
                 } else if (type.equals("CAR")) {
                     cur = new Car(split[1], split[2], split[3], Integer.parseInt(split[4]), Double.parseDouble(split[5]), Boolean.parseBoolean(split[6]));
@@ -111,7 +102,35 @@ public class VehicleRepository implements IVehicleRepository {
 
     @Override
     public boolean remove(String id) {
+        for(int i = 0; i < vehicles.size(); i++){
+            if(vehicles.get(i).getId().equals(id)){
+                vehicles.remove(i);
+                save();
+                return true;
+            }
+        }
         return false;
+    }
+
+
+    @Override
+    public boolean add(Vehicle vehicle) {
+       if(vehicle != null){
+           vehicles.add(vehicle);
+           save();
+           return true;
+       }
+       return false;
+    }
+
+    @Override
+    public Vehicle getVehicle(String id) {
+      for(Vehicle v:vehicles){
+          if(v.getId().equals(id)){
+            return v.copy();
+          }
+      }
+      return null;
     }
 
 }

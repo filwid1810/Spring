@@ -4,11 +4,12 @@ package org.example;
 
 public class Main {
     public static void main(String[] args) {
+        IVehicleRepository vehicleRepo = new VehicleRepository();
+        IUserRepository userRepo = new UserRepository();
+        Authentication auth = new Authentication(userRepo);
+        Ui ui = new Ui(vehicleRepo, userRepo, auth);
 
-        IVehicleRepository repo = new VehicleRepository();
-        repo.load("vehicles.csv");
-        Ui ui = new Ui(repo);
+
         ui.run();
-
     }
 }

@@ -3,9 +3,9 @@ package org.example;
 import org.apache.commons.codec.digest.DigestUtils;
 
 public class Hasher {
-    public static void hashPassword(String password) {
+    public static String hashPassword(String password) {
 
-        DigestUtils.sha256Hex(password);
+        return DigestUtils.sha256Hex(password);
     }
 
 }

@@ -1,17 +1,24 @@
 package org.example;
 
 public class Authentication {
+    private final IUserRepository userRepository;
 
     public Authentication(IUserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
-    public static String hashPassword(String admin123) {
-        Hasher.hashPassword(admin123);
-        return admin123;
+    public static String hashPassword(String password) {
+    return Hasher.hashPassword(password);
     }
 
-    public User authenticate(String admin, String admin123) {
-        
+    public User authenticate(String login, String password) {
+        User user = userRepository.getUser(login);
+        if(user != null ){
+            String hashedPassword = hashPassword(password);
+            if(user.getPassword().equals(hashedPassword)){
+                return user;
+            }
+        }
     return null;
     }
 }

@@ -6,10 +6,11 @@ public class User {
     Role role;
     String rentedVehicles = "";
 
-    public User(String login, String password, Role role) {
+    public User(String login, String password, Role role, String rentedVehicleId) {
         this.login = login;
         this.password = password;
         this.role = role;
+        this.rentedVehicles = rentedVehicleId;
     }
 
     public String toCSV() {
@@ -26,7 +27,7 @@ public class User {
                 '}';
     }
     public User copy() {
-        return new User(this.login, this.password, this.role);
+        return new User(this.login, this.password, this.role, rentedVehicles);
     }
 
     public String getLogin() {

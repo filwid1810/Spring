@@ -1,10 +1,10 @@
 package org.example;
 
 public class Motorcycle extends Vehicle {
-    private String category;
+    private MotorcycleCategory category;
 
 
-    public Motorcycle( String id,String brand, String model, int year, Double price, boolean rented, String category) {
+    public Motorcycle(String id, String brand, String model, int year, Double price, boolean rented, MotorcycleCategory category) {
         super(id,brand, model, year, price, rented );
         this.category = category;
     }
@@ -24,11 +24,11 @@ public class Motorcycle extends Vehicle {
         return "{MOTORCYCLE " + super.toString()+ ";"+category;
     }
 
-    public String getCategory() {
+    public MotorcycleCategory getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
+    public void setCategory(MotorcycleCategory category) {
         this.category = category;
     }
 }
