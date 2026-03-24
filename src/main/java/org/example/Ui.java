@@ -45,7 +45,7 @@ public class Ui {
         System.out.println("2. Rent vehicle");
         System.out.println("3. Return vehicle");
         System.out.println("4. See all vehicles");
-        System.out.println("5. Exit");
+        System.out.println("0. Exit");
         System.out.println("Enter your choice: ");
         String choice = scanner.nextLine();
         switch (choice) {
@@ -75,6 +75,7 @@ public class Ui {
         System.out.println("2: Dodaj nowy pojazd");
         System.out.println("3: Usuń pojazd");
         System.out.println("4: Wyświetl listę użytkowników i ich pojazdy");
+        System.out.println("5: Usuń usera");
         System.out.println("0: Wyjście (Wyloguj)");
         System.out.print("Wybierz komendę: ");
         String command = scanner.nextLine();
@@ -92,6 +93,8 @@ public class Ui {
             case "4":
                 displayAllUsers();
                 break;
+                case "5":
+                    removeUser();
             case "0":
                 System.out.println("Wylogowano.");
                 return false;
@@ -116,7 +119,7 @@ public class Ui {
         if (user.getRentedVehicles()!= null && !user.getRentedVehicles().isEmpty()) {
             Vehicle v = vehicleRepository.getVehicle(user.getRentedVehicles());
             if (v != null) {
-                System.out.println("Wypożyczony pojazd: " + v.toString());
+                System.out.println("Wypożyczony pojazd: " + v);
             } else {
                 System.out.println(" Pojazd o ID " + user.getRentedVehicles() + " nie istnieje w bazie!");
             }
@@ -186,6 +189,50 @@ public class Ui {
             } else {
                 System.out.println(" | Brak wypożyczonego pojazdu");
             }
+        }
+    }
+    private void registerUser() {
+        System.out.println("\n--- REJESTRACJA ---");
+        System.out.print("Podaj nowy login: ");
+        String login = scanner.nextLine();
+
+        if (userRepository.getUser(login) != null) {
+            System.out.println("Użytkownik o takim loginie już istnieje");
+            return;
+        }
+
+        System.out.print("Podaj hasło: ");
+        String plainPassword = scanner.nextLine();
+
+        String hashedPassword = Authentication.hashPassword(plainPassword);
+
+        User newUser = new User(login, hashedPassword, Role.USER, null);
+
+        if (userRepository.register(newUser)) {
+            System.out.println("Rejestracja zakończona sukcesem");
+        } else {
+            System.out.println("Błąd rejestracji");
+        }
+    }
+    private void removeUser() {
+        System.out.print("Podaj login użytkownika do usunięcia: ");
+        String login = scanner.nextLine();
+
+        User u = userRepository.getUser(login);
+        if (u == null) {
+            System.out.println("Nie znaleziono użytkownika o takim loginie");
+            return;
+        }
+
+        if (u.getRentedVehicles() != null && !u.getRentedVehicles().isEmpty()) {
+            System.out.println(" Nie można usunąć użytkownika trzeba zwrócić pojazd");
+            return;
+        }
+
+        if (userRepository.delete(login)) {
+            System.out.println("Użytkownik '" + login + "' został pomyślnie usunięty");
+        } else {
+            System.out.println("Błąd podczas usuwania użytkownika");
         }
     }
 }

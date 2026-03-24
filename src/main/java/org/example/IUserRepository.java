@@ -6,6 +6,7 @@ public interface IUserRepository {
     User getUser(String login);
     List<User> getUsers();
     boolean update(User user);
-    void save(String filePath);
-    void load(String filePath);
+    boolean register(User user);
+    boolean delete(String login);
+
 }

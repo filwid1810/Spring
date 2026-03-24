@@ -39,8 +39,8 @@ public class UserRepository implements IUserRepository {
     }
 
 
-    @Override
-    public void save(String filePath) {
+
+    private void save(String filePath) {
             try(PrintWriter writer = new PrintWriter(filePath)) {
                 for(User user:users){
                    String vehicleId = (user.getRentedVehicles() == null)? "" : user.getRentedVehicles();
@@ -52,8 +52,8 @@ public class UserRepository implements IUserRepository {
 
         }
 
-    @Override
-    public void load(String filePath) {
+
+    private void load(String filePath) {
        try {
            File file = new File(filePath);
            Scanner scannerf = new Scanner(file);
@@ -85,8 +85,45 @@ public class UserRepository implements IUserRepository {
                 return true;
             }
         }
-
         return false;
     }
+    @Override
+    public boolean register(User user) {
 
+        for (User u : users) {
+            if (u.getLogin().equals(user.getLogin())) {
+                System.out.println( "jest taki user");
+                return false;
+            }
+        }
+        users.add(user);
+        save("users.csv");
+        System.out.println("udało się dodac usera ");
+
+        return true;
+    }
+
+    @Override
+    public boolean delete(String login) {
+        for (int i = 0; i < users.size(); i++) {
+            User u = users.get(i);
+            if (u.getLogin().equals(login)) {
+
+                String rented = u.getRentedVehicles();
+                if (rented != null && !rented.isEmpty()) {
+
+                    System.out.println( "user ma wyporzyczony pojazd");
+                    return false;
+                }
+                users.remove(i);
+                save("users.csv");
+                System.out.println("udało się usunąć usera");
+                return true;
+
+            }
+        }
+        System.out.println("nie znaleziono usera ");
+        return false;
+
+    }
 }
