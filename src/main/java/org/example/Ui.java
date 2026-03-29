@@ -17,17 +17,43 @@ public class Ui {
     }
 
     public void run() {
-        User loggedInUser = null;
-        while (loggedInUser == null) {
-            System.out.println("Enter login: ");
-            String login = scanner.nextLine();
-            System.out.println("Enter password: ");
-            String password = scanner.nextLine();
-            loggedInUser = authentication.authenticate(login, password);
-            if (loggedInUser == null) {
-                System.out.println("Invalid login or password");
+        boolean appRunning = true;
+        while (appRunning) {
+            System.out.println("1. Login");
+            System.out.println("2. Rejestracja");
+            System.out.println("0. Exit");
+
+            String choice = scanner.nextLine();
+            switch (choice) {
+                case "1":
+                    login();
+                    break;
+                case "2":
+                    registerUser();
+                    break;
+                case "0":
+                    System.out.println("Zamykanie programu.");
+                    appRunning = false;
+                    break;
+                default:
+                    System.out.println("Nieznana komenda.");
             }
         }
+    }
+        private void login() {
+            System.out.println("Enter login: ");
+            String login = scanner.nextLine();
+
+            System.out.println("Enter password: ");
+            String password = scanner.nextLine();
+
+            User loggedInUser = authentication.authenticate(login, password);
+
+            if (loggedInUser == null) {
+                System.out.println("Invalid login or password");
+                return;
+            }
+
         System.out.println("Welcome " + loggedInUser.getLogin());
 
         boolean running = true;

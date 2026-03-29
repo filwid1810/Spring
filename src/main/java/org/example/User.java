@@ -4,7 +4,7 @@ public class User {
     String login;
     String password;
     Role role;
-    String rentedVehicles = "";
+    String rentedVehicles ;
 
     public User(String login, String password, Role role, String rentedVehicleId) {
         this.login = login;

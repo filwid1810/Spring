@@ -89,7 +89,6 @@ public class UserRepository implements IUserRepository {
     }
     @Override
     public boolean register(User user) {
-
         for (User u : users) {
             if (u.getLogin().equals(user.getLogin())) {
                 System.out.println( "jest taki user");
