@@ -3,19 +3,23 @@ package com.umcsuser.carrent;
 import com.umcsuser.carrent.models.*;
 import com.umcsuser.carrent.repositories.*;
 import com.umcsuser.carrent.services.AuthService;
+import com.umcsuser.carrent.services.VehicleCategoryConfigService;
+import com.umcsuser.carrent.services.VehicleService;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class Ui {
-    private final VehicleRepository vehicleRepo;
+public class UI {
+    private final VehicleService vehicleService;
+    private final VehicleCategoryConfigService configService;
     private final UserRepository userRepo;
     private final RentalRepository rentalRepo;
     private final AuthService authService;
     private final Scanner scanner = new Scanner(System.in);
 
-    public Ui(VehicleRepository vehicleRepo, UserRepository userRepo, RentalRepository rentalRepo, AuthService authService) {
-        this.vehicleRepo = vehicleRepo;
+    public UI(VehicleService vehicleService, VehicleCategoryConfigService configService, UserRepository userRepo, RentalRepository rentalRepo, AuthService authService) {
+        this.vehicleService = vehicleService;
+        this.configService = configService;
         this.userRepo = userRepo;
         this.rentalRepo = rentalRepo;
         this.authService = authService;
@@ -104,20 +108,19 @@ public class Ui {
 
     private void displayAvailableVehicles() {
         System.out.println("Dostępne pojazdy:");
-        vehicleRepo.findAll().stream()
+        vehicleService.findAllVehicles().stream()
                 .filter(v -> rentalRepo.findByVehicleIdAndReturnDateIsNull(v.getId()).isEmpty())
                 .forEach(System.out::println);
     }
 
     private void displayAllVehicles() {
-        vehicleRepo.findAll().forEach(v -> {
+        vehicleService.findAllVehicles().forEach(v -> {
             String status = rentalRepo.findByVehicleIdAndReturnDateIsNull(v.getId()).isPresent() ? "[WYPOŻYCZONY]" : "[WOLNY]";
             System.out.println(status + " " + v);
         });
     }
 
     private void rentVehicle(User user) {
-
         boolean alreadyHasRental = rentalRepo.findAll().stream()
                 .anyMatch(r -> r.getUserId().equals(user.getId()) && r.isActive());
 
@@ -129,7 +132,7 @@ public class Ui {
         System.out.print("Podaj ID pojazdu: ");
         String vehicleId = scanner.nextLine();
 
-        Optional<Vehicle> vehicle = vehicleRepo.findById(vehicleId);
+        Optional<Vehicle> vehicle = vehicleService.findById(vehicleId);
         if (vehicle.isPresent() && rentalRepo.findByVehicleIdAndReturnDateIsNull(vehicleId).isEmpty()) {
             Rental rental = Rental.builder()
                     .id(UUID.randomUUID().toString())
@@ -156,25 +159,82 @@ public class Ui {
     }
 
     private void addVehicle() {
-        System.out.print("ID: "); String id = scanner.nextLine();
+        System.out.println("\n--- DODAWANIE POJAZDU ---");
+        System.out.print("Podaj kategorię (Car, Motorcycle, Bus): ");
+        String category = scanner.nextLine();
+
+        if (!configService.categoryExists(category)) {
+            System.out.println("Błąd: Nieznana kategoria pojazdu!");
+            return;
+        }
+
         System.out.print("Marka: "); String brand = scanner.nextLine();
         System.out.print("Model: "); String model = scanner.nextLine();
         System.out.print("Rok: "); int year = Integer.parseInt(scanner.nextLine());
+        System.out.print("Rejestracja: "); String plate = scanner.nextLine();
         System.out.print("Cena: "); double price = Double.parseDouble(scanner.nextLine());
 
-        Vehicle vehicle = new Vehicle(id, null, brand, model, year, null, price, new HashMap<>());
-        vehicleRepo.save(vehicle);
-        System.out.println("Pojazd dodany.");
+        Vehicle vehicle = Vehicle.builder()
+                .id(UUID.randomUUID().toString())
+                .category(category)
+                .brand(brand)
+                .model(model)
+                .year(year)
+                .plate(plate)
+                .price(price)
+                .build();
+
+        VehicleCategoryConfig config = configService.getByCategory(category);
+        for (Map.Entry<String, String> entry : config.getAttributes().entrySet()) {
+            String attrName = entry.getKey();
+            String expectedType = entry.getValue();
+
+            System.out.print("Podaj '" + attrName + "' (typ: " + expectedType + "): ");
+            String input = scanner.nextLine();
+
+            try {
+                if (expectedType.equalsIgnoreCase("integer")) {
+                    vehicle.addAttribute(attrName, Integer.parseInt(input));
+                } else if (expectedType.equalsIgnoreCase("number")) {
+                    vehicle.addAttribute(attrName, Double.parseDouble(input));
+                } else if (expectedType.equalsIgnoreCase("boolean")) {
+                    vehicle.addAttribute(attrName, Boolean.parseBoolean(input));
+                } else {
+                    vehicle.addAttribute(attrName, input);
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Błąd: Podałeś zły format danych dla atrybutu " + attrName);
+                return;
+            }
+        }
+
+        try {
+            vehicleService.addVehicle(vehicle);
+            System.out.println("Pojazd dodany pomyślnie!");
+        } catch (IllegalArgumentException e) {
+            System.out.println("BŁĄD WALIDACJI: " + e.getMessage());
+        }
     }
 
     private void removeVehicle() {
         System.out.print("Podaj ID pojazdu do usunięcia: ");
         String id = scanner.nextLine();
-        vehicleRepo.deleteById(id);
+
+        vehicleService.deleteById(id);
         System.out.println("Pojazd usunięty.");
     }
 
     private void displayAllUsers() {
-        userRepo.findAll().forEach(System.out::println);
+        userRepo.findAll().forEach(u -> {
+            System.out.print(u.toString());
+
+            rentalRepo.findAll().stream()
+                    .filter(r -> r.getUserId().equals(u.getId()) && r.isActive())
+                    .findFirst()
+                    .ifPresentOrElse(
+                            rental -> System.out.println(" -> Wypożyczył pojazd (ID: " + rental.getVehicleId() + ")"),
+                            () -> System.out.println(" -> Brak aktywnych wypożyczeń")
+                    );
+        });
     }
 }

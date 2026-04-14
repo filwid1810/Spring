@@ -1,18 +1,23 @@
 package com.umcsuser.carrent;
 
-import com.umcsuser.carrent.repositories.*;
 import com.umcsuser.carrent.repositories.impl.*;
-import com.umcsuser.carrent.services.AuthService;
+import com.umcsuser.carrent.services.*;
 
 public class Main {
     public static void main(String[] args) {
-        VehicleRepository vehicleRepo = new VehicleJsonRepository();
-        UserRepository userRepo = new UserJsonRepository();
-        RentalRepository rentalRepo = new RentalJsonRepository();
 
+        VehicleCategoryConfigJsonRepository configRepo = new VehicleCategoryConfigJsonRepository();
+        VehicleJsonRepository vehicleRepo = new VehicleJsonRepository();
+        UserJsonRepository userRepo = new UserJsonRepository();
+        RentalJsonRepository rentalRepo = new RentalJsonRepository();
+
+        VehicleCategoryConfigService configService = new VehicleCategoryConfigService(configRepo);
+        VehicleValidator validator = new VehicleValidator(configService);
+
+        VehicleService vehicleService = new VehicleService(validator, vehicleRepo);
         AuthService authService = new AuthService(userRepo);
 
-        Ui ui = new Ui(vehicleRepo, userRepo, rentalRepo, authService);
+        UI ui = new UI(vehicleService, configService, userRepo, rentalRepo, authService);
         ui.start();
     }
 }

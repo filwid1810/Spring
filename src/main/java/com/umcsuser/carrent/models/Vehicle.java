@@ -1,13 +1,18 @@
 package com.umcsuser.carrent.models;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 @Getter
+@Setter
+@NoArgsConstructor
+@EqualsAndHashCode(of = "id")
+@ToString
 public class Vehicle {
+
     private String id;
     private String category;
     private String brand;
@@ -15,9 +20,20 @@ public class Vehicle {
     private int year;
     private String plate;
     private double price;
-    private Map<String, Object> attributes;
 
-    public Vehicle(String id, String category, String brand, String model, int year, String plate, double price, Map<String, Object> attributes) {
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private Map<String, Object> attributes = new HashMap<>();
+
+    @Builder
+    public Vehicle(String id,
+                   String category,
+                   String brand,
+                   String model,
+                   int year,
+                   String plate,
+                   double price,
+                   Map<String, Object> attributes) {
         this.id = id;
         this.category = category;
         this.brand = brand;
@@ -25,21 +41,34 @@ public class Vehicle {
         this.year = year;
         this.plate = plate;
         this.price = price;
-        this.attributes = (attributes != null) ? new HashMap<>(attributes) : new HashMap<>();
+        this.attributes = attributes == null ? new HashMap<>() : new HashMap<>(attributes);
     }
 
-    Map<String, Object> getAttributes() { return attributes; }
-    public Object getAttribute(String key) { return attributes.get(key); }
-    public void addAttribute(String key, Object value) { attributes.put(key, value); }
-    public void removeAttribute(String key) { attributes.remove(key); }
+    public Map<String, Object> getAttributes() {
+        return Collections.unmodifiableMap(attributes);
+    }
+
+    public Object getAttribute(String key) {
+        return attributes.get(key);
+    }
+
+    public void addAttribute(String key, Object value) {
+        attributes.put(key, value);
+    }
+
+    public void removeAttribute(String key) {
+        attributes.remove(key);
+    }
 
     public Vehicle copy() {
-        return new Vehicle(id, category, brand, model, year, plate, price, attributes);
-    }
-
-    @Override
-    public String toString() {
-        return String.format("Pojazd [ %s %s | Rok: %d | Rejestracja: %s | Cena: %.2f PLN]",
-                 brand, model, year, (plate != null ? plate : "Brak"), price);
+        return Vehicle.builder()
+                .category(category)
+                .brand(brand)
+                .model(model)
+                .year(year)
+                .plate(plate)
+                .price(price)
+                .attributes(new HashMap<>(attributes))
+                .build();
     }
 }
