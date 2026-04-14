@@ -196,7 +196,7 @@ public class UI {
                 if (expectedType.equalsIgnoreCase("integer")) {
                     vehicle.addAttribute(attrName, Integer.parseInt(input));
                 } else if (expectedType.equalsIgnoreCase("number")) {
-                    vehicle.addAttribute(attrName, Integer.parseInt(input));
+                    vehicle.addAttribute(attrName, Double.parseDouble(input));
                 } else if (expectedType.equalsIgnoreCase("boolean")) {
                     vehicle.addAttribute(attrName, Boolean.parseBoolean(input));
                 } else {
