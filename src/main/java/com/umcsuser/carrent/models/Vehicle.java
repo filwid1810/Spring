@@ -36,6 +36,7 @@ public class Vehicle {
     public Vehicle copy() {
         return new Vehicle(id, category, brand, model, year, plate, price, attributes);
     }
+
     @Override
     public String toString() {
         return String.format("Pojazd [ %s %s | Rok: %d | Rejestracja: %s | Cena: %.2f PLN]",

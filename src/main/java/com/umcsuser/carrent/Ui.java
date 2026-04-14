@@ -102,8 +102,6 @@ public class Ui {
         }
     }
 
-    // --- LOGIKA POJAZDÓW ---
-
     private void displayAvailableVehicles() {
         System.out.println("Dostępne pojazdy:");
         vehicleRepo.findAll().stream()
@@ -119,7 +117,7 @@ public class Ui {
     }
 
     private void rentVehicle(User user) {
-        // Sprawdź czy user już czegoś nie wypożyczył
+
         boolean alreadyHasRental = rentalRepo.findAll().stream()
                 .anyMatch(r -> r.getUserId().equals(user.getId()) && r.isActive());
 
