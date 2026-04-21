@@ -93,6 +93,7 @@ public class UI {
             System.out.println("2. Dodaj pojazd");
             System.out.println("3. Usuń pojazd");
             System.out.println("4. Lista wszystkich użytkowników");
+            System.out.println("5. Usuń użytkownika");
             System.out.println("0. Wyloguj");
             System.out.print("Wybór: ");
 
@@ -101,6 +102,7 @@ public class UI {
                 case "2" -> addVehicle();
                 case "3" -> removeVehicle();
                 case "4" -> displayAllUsers();
+                case "5" -> removeUser();
                 case "0" -> loggedIn = false;
             }
         }
@@ -220,8 +222,39 @@ public class UI {
         System.out.print("Podaj ID pojazdu do usunięcia: ");
         String id = scanner.nextLine();
 
-        vehicleService.deleteById(id);
-        System.out.println("Pojazd usunięty.");
+        try {
+            vehicleService.deleteById(id);
+            System.out.println("Pojazd usunięty.");
+        } catch (IllegalStateException e) {
+            System.out.println("Błąd: " + e.getMessage());
+        }
+    }
+    private void removeUser() {
+        System.out.print("Podaj ID (lub Login) użytkownika do usunięcia: ");
+        String loginOrId = scanner.nextLine();
+
+        Optional<User> userOpt = userRepo.findByLogin(loginOrId);
+        if (userOpt.isEmpty()) {
+            userOpt = userRepo.findById(loginOrId);
+        }
+
+        if (userOpt.isEmpty()) {
+            System.out.println("Błąd: Nie znaleziono użytkownika.");
+            return;
+        }
+
+        User targetUser = userOpt.get();
+
+        boolean hasActiveRental = rentalRepo.findAll().stream()
+                .anyMatch(r -> r.getUserId().equals(targetUser.getId()) && r.isActive());
+
+        if (hasActiveRental) {
+            System.out.println("Błąd: Nie można usunąć użytkownika, ponieważ posiada on aktywny wynajem.");
+            return;
+        }
+
+        userRepo.deleteById(targetUser.getId());
+        System.out.println("Użytkownik usunięty.");
     }
 
     private void displayAllUsers() {

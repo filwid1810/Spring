@@ -14,7 +14,7 @@ public class Main {
         VehicleCategoryConfigService configService = new VehicleCategoryConfigService(configRepo);
         VehicleValidator validator = new VehicleValidator(configService);
 
-        VehicleService vehicleService = new VehicleService(validator, vehicleRepo);
+        VehicleService vehicleService = new VehicleService(validator, vehicleRepo, rentalRepo);
         AuthService authService = new AuthService(userRepo);
 
         UI ui = new UI(vehicleService, configService, userRepo, rentalRepo, authService);

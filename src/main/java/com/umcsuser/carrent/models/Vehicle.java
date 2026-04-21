@@ -62,6 +62,7 @@ public class Vehicle {
 
     public Vehicle copy() {
         return Vehicle.builder()
+                .id(id)
                 .category(category)
                 .brand(brand)
                 .model(model)
