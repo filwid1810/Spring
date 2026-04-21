@@ -14,10 +14,12 @@ public class Main {
         VehicleCategoryConfigService configService = new VehicleCategoryConfigService(configRepo);
         VehicleValidator validator = new VehicleValidator(configService);
 
+        RentalService rentalService = new RentalService(rentalRepo);
         VehicleService vehicleService = new VehicleService(validator, vehicleRepo, rentalRepo);
+        UserService userService = new UserService(userRepo, rentalService);
         AuthService authService = new AuthService(userRepo);
 
-        UI ui = new UI(vehicleService, configService, userRepo, rentalRepo, authService);
+        UI ui = new UI(vehicleService, configService, userService, rentalService, authService);
         ui.start();
     }
 }

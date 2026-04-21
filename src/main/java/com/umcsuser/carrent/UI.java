@@ -2,9 +2,7 @@ package com.umcsuser.carrent;
 
 import com.umcsuser.carrent.models.*;
 import com.umcsuser.carrent.repositories.*;
-import com.umcsuser.carrent.services.AuthService;
-import com.umcsuser.carrent.services.VehicleCategoryConfigService;
-import com.umcsuser.carrent.services.VehicleService;
+import com.umcsuser.carrent.services.*;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -12,16 +10,16 @@ import java.util.*;
 public class UI {
     private final VehicleService vehicleService;
     private final VehicleCategoryConfigService configService;
-    private final UserRepository userRepo;
-    private final RentalRepository rentalRepo;
+    private final UserService userService;
+    private final RentalService rentalService;
     private final AuthService authService;
     private final Scanner scanner = new Scanner(System.in);
 
-    public UI(VehicleService vehicleService, VehicleCategoryConfigService configService, UserRepository userRepo, RentalRepository rentalRepo, AuthService authService) {
+    public UI(VehicleService vehicleService, VehicleCategoryConfigService configService, UserService userService, RentalService rentalService, AuthService authService) {
         this.vehicleService = vehicleService;
         this.configService = configService;
-        this.userRepo = userRepo;
-        this.rentalRepo = rentalRepo;
+        this.userService = userService;
+        this.rentalService = rentalService;
         this.authService = authService;
     }
 
@@ -111,22 +109,19 @@ public class UI {
     private void displayAvailableVehicles() {
         System.out.println("Dostępne pojazdy:");
         vehicleService.findAllVehicles().stream()
-                .filter(v -> rentalRepo.findByVehicleIdAndReturnDateIsNull(v.getId()).isEmpty())
+                .filter(v -> !rentalService.vehicleHasActiveRental(v.getId()))
                 .forEach(System.out::println);
     }
 
     private void displayAllVehicles() {
         vehicleService.findAllVehicles().forEach(v -> {
-            String status = rentalRepo.findByVehicleIdAndReturnDateIsNull(v.getId()).isPresent() ? "[WYPOŻYCZONY]" : "[WOLNY]";
+            String status = rentalService.vehicleHasActiveRental(v.getId()) ? "[WYPOŻYCZONY]" : "[WOLNY]";
             System.out.println(status + " " + v);
         });
     }
 
     private void rentVehicle(User user) {
-        boolean alreadyHasRental = rentalRepo.findAll().stream()
-                .anyMatch(r -> r.getUserId().equals(user.getId()) && r.isActive());
-
-        if (alreadyHasRental) {
+        if (rentalService.userHasActiveRental(user.getId())) {
             System.out.println("Masz już wypożyczony pojazd!");
             return;
         }
@@ -135,14 +130,8 @@ public class UI {
         String vehicleId = scanner.nextLine();
 
         Optional<Vehicle> vehicle = vehicleService.findById(vehicleId);
-        if (vehicle.isPresent() && rentalRepo.findByVehicleIdAndReturnDateIsNull(vehicleId).isEmpty()) {
-            Rental rental = Rental.builder()
-                    .id(UUID.randomUUID().toString())
-                    .userId(user.getId())
-                    .vehicleId(vehicleId)
-                    .rentDateTime(LocalDateTime.now().toString())
-                    .build();
-            rentalRepo.save(rental);
+        if (vehicle.isPresent() && !rentalService.vehicleHasActiveRental(vehicleId)) {
+            rentalService.rentVehicle(user.getId(), vehicleId);
             System.out.println("Pomyślnie wypożyczono pojazd.");
         } else {
             System.out.println("Pojazd niedostępny lub nie istnieje.");
@@ -150,14 +139,12 @@ public class UI {
     }
 
     private void returnVehicle(User user) {
-        rentalRepo.findAll().stream()
-                .filter(r -> r.getUserId().equals(user.getId()) && r.isActive())
-                .findFirst()
-                .ifPresentOrElse(rental -> {
-                    rental.setReturnDateTime(LocalDateTime.now().toString());
-                    rentalRepo.save(rental);
-                    System.out.println("Pojazd zwrócony.");
-                }, () -> System.out.println("Nie masz nic do zwrócenia."));
+        try {
+            rentalService.returnVehicle(user.getId());
+            System.out.println("Pojazd zwrócony.");
+        } catch (IllegalStateException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     private void addVehicle() {
@@ -247,41 +234,22 @@ public class UI {
         System.out.print("Podaj ID (lub Login) użytkownika do usunięcia: ");
         String loginOrId = scanner.nextLine();
 
-        Optional<User> userOpt = userRepo.findByLogin(loginOrId);
-        if (userOpt.isEmpty()) {
-            userOpt = userRepo.findById(loginOrId);
+        try {
+            userService.removeUser(loginOrId);
+            System.out.println("Użytkownik usunięty.");
+        } catch (Exception e) {
+            System.out.println("Błąd: " + e.getMessage());
         }
-
-        if (userOpt.isEmpty()) {
-            System.out.println("Błąd: Nie znaleziono użytkownika.");
-            return;
-        }
-
-        User targetUser = userOpt.get();
-
-        boolean hasActiveRental = rentalRepo.findAll().stream()
-                .anyMatch(r -> r.getUserId().equals(targetUser.getId()) && r.isActive());
-
-        if (hasActiveRental) {
-            System.out.println("Błąd: Nie można usunąć użytkownika, ponieważ posiada on aktywny wynajem.");
-            return;
-        }
-
-        userRepo.deleteById(targetUser.getId());
-        System.out.println("Użytkownik usunięty.");
     }
 
     private void displayAllUsers() {
-        userRepo.findAll().forEach(u -> {
+        userService.findAllUsers().forEach(u -> {
             System.out.print(u.toString());
 
-            rentalRepo.findAll().stream()
-                    .filter(r -> r.getUserId().equals(u.getId()) && r.isActive())
-                    .findFirst()
-                    .ifPresentOrElse(
-                            rental -> System.out.println(" -> Wypożyczył pojazd (ID: " + rental.getVehicleId() + ")"),
-                            () -> System.out.println(" -> Brak aktywnych wypożyczeń")
-                    );
+            rentalService.getActiveRentalForUser(u.getId()).ifPresentOrElse(
+                    rental -> System.out.println(" -> Wypożyczył pojazd (ID: " + rental.getVehicleId() + ")"),
+                    () -> System.out.println(" -> Brak aktywnych wypożyczeń")
+            );
         });
     }
 }
