@@ -11,7 +11,7 @@ public class VehicleService {
 
     private final VehicleValidator vehicleValidator;
     private final VehicleRepository vehicleRepository;
-    private final RentalRepository rentalRepository; // <--- NOWE
+    private final RentalRepository rentalRepository;
 
     public VehicleService(VehicleValidator vehicleValidator, VehicleRepository vehicleRepository, RentalRepository rentalRepository) {
         this.vehicleValidator = vehicleValidator;
