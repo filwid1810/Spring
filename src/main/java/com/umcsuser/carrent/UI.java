@@ -172,11 +172,25 @@ public class UI {
 
         System.out.print("Marka: "); String brand = scanner.nextLine();
         System.out.print("Model: "); String model = scanner.nextLine();
-        System.out.print("Rok: "); int year = Integer.parseInt(scanner.nextLine());
-        System.out.print("Rejestracja: "); String plate = scanner.nextLine();
-        System.out.print("Cena: "); double price = Double.parseDouble(scanner.nextLine());
 
-        Vehicle vehicle = Vehicle.builder()
+        int year;
+        String plate;
+        double price;
+        try {
+            System.out.print("Rok: ");
+            year = Integer.parseInt(scanner.nextLine());
+
+            System.out.print("Rejestracja: ");
+            plate = scanner.nextLine();
+
+            System.out.print("Cena: ");
+            price = Double.parseDouble(scanner.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Błąd: Rok i Cena muszą być poprawnymi liczbami! Przerwano dodawanie pojazdu.");
+            return;
+        }
+
+      Vehicle vehicle = Vehicle.builder()
                 .id(UUID.randomUUID().toString())
                 .category(category)
                 .brand(brand)
