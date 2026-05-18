@@ -1,6 +1,9 @@
 package com.umcsuser.carrent.models;
 
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
+import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Type;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,29 +14,30 @@ import java.util.Map;
 @NoArgsConstructor
 @EqualsAndHashCode(of = "id")
 @ToString
+@Entity
+@Table(name = "vehicle")
 public class Vehicle {
-
+    @Id
+    @Column(nullable = false, unique = true)
     private String id;
+
     private String category;
     private String brand;
     private String model;
     private int year;
     private String plate;
+
+    @Column(columnDefinition = "NUMERIC")
     private double price;
 
+    @Type(JsonBinaryType.class)
+    @Column(columnDefinition = "jsonb")
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     private Map<String, Object> attributes = new HashMap<>();
 
     @Builder
-    public Vehicle(String id,
-                   String category,
-                   String brand,
-                   String model,
-                   int year,
-                   String plate,
-                   double price,
-                   Map<String, Object> attributes) {
+    public Vehicle(String id, String category, String brand, String model, int year, String plate, double price, Map<String, Object> attributes) {
         this.id = id;
         this.category = category;
         this.brand = brand;
@@ -48,18 +52,9 @@ public class Vehicle {
         return Collections.unmodifiableMap(attributes);
     }
 
-    public Object getAttribute(String key) {
-        return attributes.get(key);
-    }
-
     public void addAttribute(String key, Object value) {
         attributes.put(key, value);
     }
-
-    public void removeAttribute(String key) {
-        attributes.remove(key);
-    }
-
     public Vehicle copy() {
         return Vehicle.builder()
                 .id(id)

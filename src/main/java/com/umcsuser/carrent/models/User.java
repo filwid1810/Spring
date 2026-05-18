@@ -1,4 +1,6 @@
 package com.umcsuser.carrent.models;
+
+import jakarta.persistence.*;
 import lombok.*;
 
 @Getter
@@ -7,13 +9,23 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(of = "id")
-@ToString
+@ToString(exclude = "passwordHash")
+@Entity
+@Table(name = "users")
 public class User {
+    @Id
+    @Column(nullable = false, unique = true)
     private String id;
-    private String login;
-    private String passwordHash;
-    private Role role;
 
+    @Column(nullable = false, unique = true)
+    private String login;
+
+    @Column(name = "password_hash", nullable = false)
+    private String passwordHash;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
     public User copy() {
         return User.builder()
                 .id(id)
@@ -22,8 +34,5 @@ public class User {
                 .role(role)
                 .build();
     }
-    @Override
-    public String toString() {
-        return String.format("Użytkownik [Login: %s | Rola: %s]", login, role);
-    }
+
 }

@@ -8,14 +8,18 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 public class UI {
-    private final VehicleService vehicleService;
+    private final VehicleServiceInterface vehicleService;
     private final VehicleCategoryConfigService configService;
-    private final UserService userService;
-    private final RentalService rentalService;
-    private final AuthService authService;
+    private final UserServiceInterface userService;
+    private final RentalServiceInterface rentalService;
+    private final AuthServiceInterface authService;
     private final Scanner scanner = new Scanner(System.in);
 
-    public UI(VehicleService vehicleService, VehicleCategoryConfigService configService, UserService userService, RentalService rentalService, AuthService authService) {
+    public UI(VehicleServiceInterface vehicleService,
+              VehicleCategoryConfigService configService,
+              UserServiceInterface userService,
+              RentalServiceInterface rentalService,
+              AuthServiceInterface authService) {
         this.vehicleService = vehicleService;
         this.configService = configService;
         this.userService = userService;
@@ -129,8 +133,9 @@ public class UI {
         System.out.print("Podaj ID pojazdu: ");
         String vehicleId = scanner.nextLine();
 
-        Optional<Vehicle> vehicle = vehicleService.findById(vehicleId);
-        if (vehicle.isPresent() && !rentalService.vehicleHasActiveRental(vehicleId)) {
+        Vehicle vehicle = vehicleService.findById(vehicleId);
+
+        if (vehicle != null && !rentalService.vehicleHasActiveRental(vehicleId)) {
             rentalService.rentVehicle(user.getId(), vehicleId);
             System.out.println("Pomyślnie wypożyczono pojazd.");
         } else {
@@ -224,7 +229,7 @@ public class UI {
         String id = scanner.nextLine();
 
         try {
-            vehicleService.deleteById(id);
+            vehicleService.removeVehicle(id);
             System.out.println("Pojazd usunięty.");
         } catch (IllegalStateException e) {
             System.out.println("Błąd: " + e.getMessage());
@@ -235,7 +240,7 @@ public class UI {
         String loginOrId = scanner.nextLine();
 
         try {
-            userService.removeUser(loginOrId);
+            userService.deleteUser(loginOrId, null);
             System.out.println("Użytkownik usunięty.");
         } catch (Exception e) {
             System.out.println("Błąd: " + e.getMessage());
@@ -246,8 +251,10 @@ public class UI {
         userService.findAllUsers().forEach(u -> {
             System.out.print(u.toString());
 
-            rentalService.getActiveRentalForUser(u.getId()).ifPresentOrElse(
-                    rental -> System.out.println(" -> Wypożyczył pojazd (ID: " + rental.getVehicleId() + ")"),
+            rentalService.findActiveRentalByUserId(u.getId()).ifPresentOrElse(
+                    rental -> {
+                        System.out.println(" -> Wypożyczył pojazd (ID: " + rental.getVehicleId() + ")");
+                    },
                     () -> System.out.println(" -> Brak aktywnych wypożyczeń")
             );
         });

@@ -2,6 +2,8 @@ package com.umcsuser.carrent.repositories.impl;
 
 import com.umcsuser.carrent.db.JdbcConnectionManager;
 import com.umcsuser.carrent.models.Rental;
+import com.umcsuser.carrent.models.User;
+import com.umcsuser.carrent.models.Vehicle;
 import com.umcsuser.carrent.repositories.RentalRepository;
 
 import java.sql.*;
@@ -82,10 +84,14 @@ public class RentalJdbcRepository implements RentalRepository {
     }
 
     private Rental mapRowToRental(ResultSet rs) throws SQLException {
+
+        Vehicle tempVehicle = Vehicle.builder().id(rs.getString("vehicle_id")).build();
+        User tempUser = User.builder().id(rs.getString("user_id")).build();
+
         return Rental.builder()
                 .id(rs.getString("id"))
-                .vehicleId(rs.getString("vehicle_id"))
-                .userId(rs.getString("user_id"))
+                .vehicle(tempVehicle)
+                .user(tempUser)
                 .rentDateTime(rs.getString("rent_date"))
                 .returnDateTime(rs.getString("return_date"))
                 .build();

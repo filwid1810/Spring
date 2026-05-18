@@ -1,6 +1,8 @@
 package com.umcsuser.carrent.services;
 
 import com.umcsuser.carrent.models.Rental;
+import com.umcsuser.carrent.models.User;
+import com.umcsuser.carrent.models.Vehicle;
 import com.umcsuser.carrent.repositories.RentalRepository;
 
 import java.time.LocalDateTime;
@@ -27,8 +29,8 @@ public class RentalService {
     public void rentVehicle(String userId, String vehicleId) {
         Rental rental = Rental.builder()
                 .id(UUID.randomUUID().toString())
-                .userId(userId)
-                .vehicleId(vehicleId)
+                .user(User.builder().id(userId).build())
+                .vehicle(Vehicle.builder().id(vehicleId).build())
                 .rentDateTime(LocalDateTime.now().toString())
                 .build();
         rentalRepository.save(rental);
