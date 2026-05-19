@@ -42,6 +42,7 @@ public class Rental {
     public String getUserId() {
         return user == null ? null : user.getId();
     }
+
     public Rental copy() {
         return Rental.builder()
                 .id(id)

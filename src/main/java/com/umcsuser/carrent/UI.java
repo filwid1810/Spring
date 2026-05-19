@@ -252,9 +252,7 @@ public class UI {
             System.out.print(u.toString());
 
             rentalService.findActiveRentalByUserId(u.getId()).ifPresentOrElse(
-                    rental -> {
-                        System.out.println(" -> Wypożyczył pojazd (ID: " + rental.getVehicleId() + ")");
-                    },
+                    rental -> System.out.println(" -> Wypożyczył pojazd (ID: " + rental.getVehicleId() + ")"),
                     () -> System.out.println(" -> Brak aktywnych wypożyczeń")
             );
         });

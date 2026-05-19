@@ -17,6 +17,7 @@ public class HibernateConfig {
             Configuration configuration = new Configuration();
 
             configuration.setProperty("hibernate.connection.driver_class", "org.postgresql.Driver");
+
             configuration.setProperty("hibernate.connection.url", System.getenv("DB_URL"));
             configuration.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
             configuration.setProperty("hibernate.show_sql", "true");

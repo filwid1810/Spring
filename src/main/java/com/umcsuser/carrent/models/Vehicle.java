@@ -55,6 +55,7 @@ public class Vehicle {
     public void addAttribute(String key, Object value) {
         attributes.put(key, value);
     }
+
     public Vehicle copy() {
         return Vehicle.builder()
                 .id(id)
