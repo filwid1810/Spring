@@ -2,44 +2,53 @@ package com.umcsuser.carrent.repositories.impl;
 
 import com.umcsuser.carrent.models.User;
 import com.umcsuser.carrent.repositories.UserRepository;
-import org.hibernate.Session;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Repository;
+
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
+@Repository
+@Profile("hibernate")
 public class UserHibernateRepository implements UserRepository {
-    private Session session;
 
-    public void setSession(Session session) {
-        this.session = session;
-    }
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Override
     public List<User> findAll() {
-        return session.createQuery("FROM User", User.class).list();
+        return entityManager.createQuery("FROM User", User.class).getResultList();
     }
 
     @Override
     public Optional<User> findById(String id) {
-        return Optional.ofNullable(session.get(User.class, id));
+        return Optional.ofNullable(entityManager.find(User.class, id));
     }
 
     @Override
     public Optional<User> findByLogin(String login) {
-        return session.createQuery("FROM User WHERE login = :login", User.class)
+        return entityManager.createQuery("FROM User WHERE login = :login", User.class)
                 .setParameter("login", login)
-                .uniqueResultOptional();
+                .getResultStream()
+                .findFirst();
     }
 
     @Override
     public User save(User user) {
-        return session.merge(user);
+        if (user.getId() == null || user.getId().isBlank()) {
+            user.setId(UUID.randomUUID().toString());
+        }
+        return entityManager.merge(user);
     }
 
     @Override
     public void deleteById(String id) {
-        User user = session.get(User.class, id);
+        User user = entityManager.find(User.class, id);
         if (user != null) {
-            session.remove(user);
+            entityManager.remove(user);
         }
     }
 }

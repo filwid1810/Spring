@@ -7,21 +7,26 @@ import com.umcsuser.carrent.repositories.RentalRepository;
 import com.umcsuser.carrent.repositories.UserRepository;
 import com.umcsuser.carrent.repositories.VehicleRepository;
 import com.umcsuser.carrent.services.RentalServiceInterface;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class SimpleRentalService implements RentalServiceInterface {
-    private final RentalRepository rentalRepository;
-    private final VehicleRepository vehicleRepository;
-    private final UserRepository userRepository;
+@Service
+@Transactional
+public class RentalService implements RentalServiceInterface {
 
-    public SimpleRentalService(RentalRepository rentalRepository, VehicleRepository vehicleRepository, UserRepository userRepository) {
-        this.rentalRepository = rentalRepository;
-        this.vehicleRepository = vehicleRepository;
-        this.userRepository = userRepository;
+    private final RentalRepository rentalRepo;
+    private final VehicleRepository vehicleRepo;
+    private final UserRepository userRepo;
+
+    public RentalService(RentalRepository rentalRepo, VehicleRepository vehicleRepo, UserRepository userRepo) {
+        this.rentalRepo = rentalRepo;
+        this.vehicleRepo = vehicleRepo;
+        this.userRepo = userRepo;
     }
 
     @Override
@@ -30,15 +35,15 @@ public class SimpleRentalService implements RentalServiceInterface {
             throw new IllegalStateException("Masz już aktywne wypożyczenie.");
         }
 
-        Vehicle vehicle = vehicleRepository.findById(vehicleId)
-                .orElse(Vehicle.builder().id(vehicleId).build());
+        Vehicle vehicle = vehicleRepo.findById(vehicleId)
+                .orElseThrow(() -> new IllegalArgumentException("Pojazd nie istnieje."));
 
         if (vehicleHasActiveRental(vehicleId)) {
             throw new IllegalStateException("Ten pojazd jest już wypożyczony.");
         }
 
-        User user = userRepository.findById(userId)
-                .orElse(User.builder().id(userId).build());
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Użytkownik nie istnieje."));
 
         Rental rental = Rental.builder()
                 .id(UUID.randomUUID().toString())
@@ -46,43 +51,50 @@ public class SimpleRentalService implements RentalServiceInterface {
                 .user(user)
                 .rentDateTime(LocalDateTime.now().toString())
                 .build();
-        return rentalRepository.save(rental);
+
+        return rentalRepo.save(rental);
     }
 
     @Override
     public Rental returnVehicle(String userId) {
         Rental rental = findActiveRentalByUserId(userId)
                 .orElseThrow(() -> new IllegalStateException("Nie masz wypożyczonego pojazdu."));
+
         rental.setReturnDateTime(LocalDateTime.now().toString());
-        return rentalRepository.save(rental);
+        return rentalRepo.save(rental);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<Rental> findActiveRentalByUserId(String userId) {
-        return rentalRepository.findAll().stream()
+        return rentalRepo.findAll().stream()
                 .filter(r -> userId.equals(r.getUserId()) && r.isActive())
                 .findFirst();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Rental> findAllRentals() {
-        return rentalRepository.findAll();
+        return rentalRepo.findAll();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Rental> findUserRentals(String userId) {
-        return rentalRepository.findAll().stream()
+        return rentalRepo.findAll().stream()
                 .filter(r -> userId.equals(r.getUserId()))
                 .toList();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean userHasActiveRental(String userId) {
         return findActiveRentalByUserId(userId).isPresent();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean vehicleHasActiveRental(String vehicleId) {
-        return rentalRepository.findByVehicleIdAndReturnDateIsNull(vehicleId).isPresent();
+        return rentalRepo.findByVehicleIdAndReturnDateIsNull(vehicleId).isPresent();
     }
 }

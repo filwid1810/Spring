@@ -4,11 +4,12 @@ import com.google.gson.reflect.TypeToken;
 import com.umcsuser.carrent.db.JsonFileStorage;
 import com.umcsuser.carrent.models.VehicleCategoryConfig;
 import com.umcsuser.carrent.repositories.VehicleCategoryConfigRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
+@Repository
 public class VehicleCategoryConfigJsonRepository implements VehicleCategoryConfigRepository {
 
     private final JsonFileStorage<VehicleCategoryConfig> storage =

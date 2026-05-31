@@ -1,0 +1,25 @@
+spring:
+  profiles:
+    active: hibernate
+  application:
+    name: carrent
+
+server:
+  port: 8081
+
+---
+spring:
+  config:
+    activate:
+      on-profile: hibernate
+  datasource:
+    url: jdbc:postgresql://ep-hidden-grass-aqoanzvi.c-8.us-east-1.aws.neon.tech/neondb?user=neondb_owner&password=npg_OusabvTHX7Y9&sslmode=require
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect

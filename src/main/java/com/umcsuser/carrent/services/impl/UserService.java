@@ -1,0 +1,46 @@
+package com.umcsuser.carrent.services.impl;
+
+import com.umcsuser.carrent.models.User;
+import com.umcsuser.carrent.repositories.RentalRepository;
+import com.umcsuser.carrent.repositories.UserRepository;
+import com.umcsuser.carrent.services.UserServiceInterface;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@Transactional
+public class UserService implements UserServiceInterface {
+
+    private final UserRepository userRepo;
+    private final RentalRepository rentalRepo;
+
+    public UserService(UserRepository userRepo, RentalRepository rentalRepo) {
+        this.userRepo = userRepo;
+        this.rentalRepo = rentalRepo;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<User> findAllUsers() {
+        return userRepo.findAll();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public User findById(String id) {
+        return userRepo.findById(id).orElse(null);
+    }
+
+    @Override
+    public void deleteUser(String id, String loggedUserId) {
+        boolean hasActiveRental = rentalRepo.findAll().stream()
+                .anyMatch(r -> id.equals(r.getUserId()) && r.isActive());
+
+        if (hasActiveRental) {
+            throw new IllegalStateException("Nie można usunąć użytkownika z aktywnym wynajmem.");
+        }
+        userRepo.deleteById(id);
+    }
+}

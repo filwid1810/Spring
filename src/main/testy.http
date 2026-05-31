@@ -1,0 +1,19 @@
+### Pobierz wszystkie pojazdy (Zwykły GET)
+GET http://localhost:8081/api/vehicles
+
+###
+
+### Dodaj nowy pojazd (Zapytanie POST)
+POST http://localhost:8081/api/vehicles
+Content-Type: application/json
+
+{
+  "id": "pojazd-testowy-1",
+  "category": "Car",
+  "brand": "Ford",
+  "model": "Focus",
+  "year": 2022,
+  "plate": "LU12345",
+  "price": 100.0,
+  "attributes": {}
+}
