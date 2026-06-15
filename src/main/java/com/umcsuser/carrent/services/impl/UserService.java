@@ -34,6 +34,13 @@ public class UserService implements UserServiceInterface {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public User findByLogin(String login) {
+        return userRepo.findByLogin(login)
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono użytkownika z loginem: " + login));
+    }
+
+    @Override
     public void deleteUser(String id, String loggedUserId) {
         boolean hasActiveRental = rentalRepo.findAll().stream()
                 .anyMatch(r -> id.equals(r.getUserId()) && r.isActive());
