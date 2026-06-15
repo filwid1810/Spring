@@ -6,6 +6,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +30,7 @@ public class UserHibernateRepository implements UserRepository {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<User> findByLogin(String login) {
         return entityManager.createQuery("FROM User WHERE login = :login", User.class)
                 .setParameter("login", login)
