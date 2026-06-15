@@ -11,5 +11,7 @@ public interface UserServiceInterface {
     User findById(String id);
     User findByLogin(String login);
 
+    void register(String login, String password);
+
     void deleteUser(String id, String loggedUserId);
 }

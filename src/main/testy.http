@@ -1,47 +1,14 @@
-
-### ETAP 1: SECURITY (REJESTRACJA I LOGOWANIE)
-
-### 1. Rejestracja nowego użytkownika
-POST http://localhost:8081/api/auth/register
-Content-Type: application/json
-
-{
-  "login": "jan_kowalski",
-  "password": "mojetajnehaslo"
-}
-
-###
-
-### 2. Logowanie i pobranie tokenu JWT
-POST http://localhost:8081/api/auth/login
-Content-Type: application/json
-
-{
-  "login": "jan_kowalski",
-  "password": "mojetajnehaslo"
-}
-
-> {%
-    client.global.set("auth_token", response.body.token);
-%}
-
-
-### ETAP 2: REST API I ROLE (POJAZDY)
-
-### 3. Pobranie listy wszystkich pojazdów (Wymaga tokenu z kroku 2)
+### Pobierz wszystkie pojazdy (Zwykły GET)
 GET http://localhost:8081/api/vehicles
-Authorization: Bearer {{auth_token}}
 
 ###
 
-### 4. Próba dodania pojazdu przez zwykłego usera
-### (Powinno zwrócić błąd 403 Forbidden, bo nowi userzy to ROLE_USER, a tu trzeba ADMIN)
+### Dodaj nowy pojazd (Zapytanie POST)
 POST http://localhost:8081/api/vehicles
-Authorization: Bearer {{auth_token}}
 Content-Type: application/json
 
 {
-  "id": "pojazd-testowy",
+  "id": "pojazd-testowy-1",
   "category": "Car",
   "brand": "Ford",
   "model": "Focus",
@@ -50,32 +17,3 @@ Content-Type: application/json
   "price": 100.0,
   "attributes": {}
 }
-
-
-### ETAP 3: WYPOŻYCZENIE I PŁATNOŚCI STRIPE
-
-### 5. Wypożyczenie pojazdu (Podmień "ID_POJAZDU" na prawdziwe ID z kroku 3!)
-POST http://localhost:8081/api/rentals/rent
-Authorization: Bearer {{auth_token}}
-Content-Type: application/json
-
-{
-  "vehicleId": "ID_POJAZDU"
-}
-
-> {%
-    // Zapisujemy ID nowo utworzonego wypożyczenia do płatności
-    client.global.set("rental_id", response.body.id);
-%}
-
-###
-
-### 6. Wygenerowanie linku do płatności Stripe dla tego wypożyczenia
-POST http://localhost:8081/api/payments/checkout/{{rental_id}}
-Authorization: Bearer {{auth_token}}
-
-###
-
-### 7. Zwrot pojazdu
-POST http://localhost:8081/api/rentals/return
-Authorization: Bearer {{auth_token}}
