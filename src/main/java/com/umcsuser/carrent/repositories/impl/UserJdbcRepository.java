@@ -93,18 +93,26 @@ public class UserJdbcRepository implements UserRepository {
 
     @Override
     public User save(User user) {
+        if (user.getId() == null || user.getId().isBlank()) {
+            user.setId(java.util.UUID.randomUUID().toString());
+        }
+
         String sql = "INSERT INTO users (id, login, password_hash, role) " +
                 "VALUES (?, ?, ?, ?) " +
                 "ON CONFLICT (id) DO UPDATE SET " +
                 "login = EXCLUDED.login, password_hash = EXCLUDED.password_hash, role = EXCLUDED.role";
+
         Connection connection = DataSourceUtils.getConnection(dataSource);
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, user.getId());
             stmt.setString(2, user.getLogin());
             stmt.setString(3, user.getPasswordHash());
+
             stmt.setString(4, user.getRole().name());
+
             stmt.executeUpdate();
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new RuntimeException("Błąd zapisu użytkownika", e);
         } finally {
             DataSourceUtils.releaseConnection(connection, dataSource);
