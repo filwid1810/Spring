@@ -86,6 +86,9 @@ public class VehicleJdbcRepository implements VehicleRepository {
 
     @Override
     public Vehicle save(Vehicle vehicle) {
+        if (vehicle.getId() == null || vehicle.getId().isBlank()) {
+            vehicle.setId(java.util.UUID.randomUUID().toString());
+        }
         String sql = "INSERT INTO vehicle (id, category, brand, model, year, plate, price, attributes) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?::jsonb) " +
                 "ON CONFLICT (id) DO UPDATE SET " +
