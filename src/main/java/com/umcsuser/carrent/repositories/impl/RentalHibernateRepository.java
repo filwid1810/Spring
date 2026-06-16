@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-@Profile("hibernate")
+@Profile("jpa")
 public class RentalHibernateRepository implements RentalRepository {
 
     @PersistenceContext

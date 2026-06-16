@@ -5,11 +5,14 @@ import com.google.gson.reflect.TypeToken;
 import com.umcsuser.carrent.db.JsonFileStorage;
 import com.umcsuser.carrent.models.User;
 import com.umcsuser.carrent.repositories.UserRepository;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
+@Repository
+@Profile("json")
 public class UserJsonRepository implements UserRepository {
 
     private final JsonFileStorage<User> storage;

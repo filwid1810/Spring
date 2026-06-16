@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-@Profile("hibernate")
+@Profile("jpa")
 public class UserHibernateRepository implements UserRepository {
 
     @PersistenceContext

@@ -11,12 +11,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-@Transactional // Spring zarządza transakcjami za nas!
+@Transactional
 public class VehicleService implements VehicleServiceInterface {
 
     private final VehicleRepository vehicleRepo;
+
     private final RentalRepository rentalRepo;
     private final VehicleValidator validator;
+
 
     public VehicleService(VehicleRepository vehicleRepo, RentalRepository rentalRepo, VehicleValidator validator) {
         this.vehicleRepo = vehicleRepo;
