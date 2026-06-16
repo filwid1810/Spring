@@ -7,7 +7,7 @@ import lombok.Getter;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
-public class HibernateConfig {
+public class  HibernateConfig {
 
     @Getter
     private static final SessionFactory sessionFactory;

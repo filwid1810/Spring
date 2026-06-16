@@ -12,7 +12,7 @@ import java.util.List;
 
 @Service
 @Transactional
-public class UserService implements UserServiceInterface {
+public class  UserService implements UserServiceInterface {
     @Autowired
     private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 

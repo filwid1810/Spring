@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Service
 @Transactional
-public class AuthService implements AuthServiceInterface {
+public class  AuthService implements AuthServiceInterface {
 
     private final UserRepository userRepo;
 

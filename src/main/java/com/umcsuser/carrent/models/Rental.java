@@ -12,7 +12,7 @@ import lombok.*;
 @ToString
 @Entity
 @Table(name = "rental")
-public class Rental {
+public class  Rental {
     @Id
     @Column(nullable = false, unique = true)
     private String id;

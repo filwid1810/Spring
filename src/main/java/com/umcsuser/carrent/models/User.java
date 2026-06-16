@@ -12,7 +12,7 @@ import lombok.*;
 @ToString(exclude = "passwordHash")
 @Entity
 @Table(name = "users")
-public class User {
+public class  User {
     @Id
     @Column(nullable = false, unique = true)
     private String id;

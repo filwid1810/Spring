@@ -7,7 +7,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 @Service
-public class VehicleCategoryConfigService {
+public class  VehicleCategoryConfigService {
     private final VehicleCategoryConfigRepository configRepository;
 
     public VehicleCategoryConfigService(VehicleCategoryConfigRepository configRepository) {

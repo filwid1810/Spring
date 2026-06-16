@@ -6,7 +6,7 @@ import com.umcsuser.carrent.models.Rental;
 import java.util.List;
 import java.util.Optional;
 
-public interface RentalServiceInterface {
+public interface  RentalServiceInterface {
 
     Rental rentVehicle(String userId, String vehicleId);
 

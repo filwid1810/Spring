@@ -11,7 +11,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JsonFileStorage<T> {
+public class  JsonFileStorage<T> {
 
     private final Gson gson = new Gson();
     private final Path path;

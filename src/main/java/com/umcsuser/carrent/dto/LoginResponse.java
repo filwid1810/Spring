@@ -1,2 +1,2 @@
 package com.umcsuser.carrent.dto;
-public record LoginResponse(String token) {}
+public record  LoginResponse(String token) {}

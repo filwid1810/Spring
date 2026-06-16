@@ -1,2 +1,2 @@
 package com.umcsuser.carrent.dto;
-public record RentalRequest(String vehicleId) {}
+public record  RentalRequest(String vehicleId) {}

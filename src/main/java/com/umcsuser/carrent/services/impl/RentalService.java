@@ -17,7 +17,7 @@ import java.util.UUID;
 
 @Service
 @Transactional
-public class RentalService implements RentalServiceInterface {
+public class   RentalService implements RentalServiceInterface {
 
     private final RentalRepository rentalRepo;
     private final VehicleRepository vehicleRepo;
