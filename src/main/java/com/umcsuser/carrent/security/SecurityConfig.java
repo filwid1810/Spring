@@ -33,7 +33,7 @@ public class  SecurityConfig {
                 .httpBasic(basic -> basic.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/error").permitAll()
                         .requestMatchers(r -> r.getMethod().equals("POST") &&
                                 r.getRequestURI().startsWith("/api/vehicles")).hasRole("ADMIN")
                         .anyRequest().authenticated()
