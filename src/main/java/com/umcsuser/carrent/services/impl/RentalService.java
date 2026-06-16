@@ -17,7 +17,7 @@ import java.util.UUID;
 
 @Service
 @Transactional
-public class   RentalService implements RentalServiceInterface {
+public class RentalService implements RentalServiceInterface {
 
     private final RentalRepository rentalRepo;
     private final VehicleRepository vehicleRepo;
@@ -27,6 +27,18 @@ public class   RentalService implements RentalServiceInterface {
         this.rentalRepo = rentalRepo;
         this.vehicleRepo = vehicleRepo;
         this.userRepo = userRepo;
+    }
+
+    private Rental populateRental(Rental rental) {
+        if (rental != null) {
+            if (rental.getVehicleId() != null) {
+                vehicleRepo.findById(rental.getVehicleId()).ifPresent(rental::setVehicle);
+            }
+            if (rental.getUserId() != null) {
+                userRepo.findById(rental.getUserId()).ifPresent(rental::setUser);
+            }
+        }
+        return rental;
     }
 
     @Override
@@ -52,7 +64,8 @@ public class   RentalService implements RentalServiceInterface {
                 .rentDateTime(LocalDateTime.now().toString())
                 .build();
 
-        return rentalRepo.save(rental);
+        Rental savedRental = rentalRepo.save(rental);
+        return populateRental(savedRental);
     }
 
     @Override
@@ -61,7 +74,9 @@ public class   RentalService implements RentalServiceInterface {
                 .orElseThrow(() -> new IllegalStateException("Nie masz wypożyczonego pojazdu."));
 
         rental.setReturnDateTime(LocalDateTime.now().toString());
-        return rentalRepo.save(rental);
+        Rental savedRental = rentalRepo.save(rental);
+
+        return populateRental(savedRental);
     }
 
     @Override
@@ -69,13 +84,16 @@ public class   RentalService implements RentalServiceInterface {
     public Optional<Rental> findActiveRentalByUserId(String userId) {
         return rentalRepo.findAll().stream()
                 .filter(r -> userId.equals(r.getUserId()) && r.isActive())
+                .map(this::populateRental)
                 .findFirst();
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Rental> findAllRentals() {
-        return rentalRepo.findAll();
+        return rentalRepo.findAll().stream()
+                .map(this::populateRental)
+                .toList();
     }
 
     @Override
@@ -83,13 +101,15 @@ public class   RentalService implements RentalServiceInterface {
     public List<Rental> findUserRentals(String userId) {
         return rentalRepo.findAll().stream()
                 .filter(r -> userId.equals(r.getUserId()))
+                .map(this::populateRental)
                 .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public boolean userHasActiveRental(String userId) {
-        return findActiveRentalByUserId(userId).isPresent();
+        return rentalRepo.findAll().stream()
+                .anyMatch(r -> userId.equals(r.getUserId()) && r.isActive());
     }
 
     @Override
